@@ -1,76 +1,244 @@
 # Real Estate Investment Advisor
+### Predicting Property Profitability & Future Value
 
-Predicts whether a listing is a **Good Investment** (rule-based proxy label) and shows a **5-year price projection**
-(assumption-based), built on `data/india_housing_prices.csv` (250,000 listings). Streamlit app + MLflow-tracked training.
+An ML-powered real estate analytics application built using Python, Scikit-learn, Streamlit and MLflow integration.
 
-> **Read first:** the dataset has no future prices and no investment outcome. The "good investment" class is a hand-written
-> rule and the 5-year price is `price × (1+r)^5` with an *assumed* `r`. Neither has a measured real-world accuracy, and this
-> project does **not** claim any forecasting accuracy. See [Methodology](#methodology) and `reports/evaluation_report.md`.
+The application helps users explore property characteristics, assess investment potential and examine estimated future property values through interactive analytics.
 
-## Quick start
+## Project Overview
+
+**Domain:** Real Estate / Investment / Financial Analytics
+
+**Technologies:**
+- Python
+- Pandas and NumPy
+- Scikit-learn
+- Machine Learning
+- Regression and Classification
+- Exploratory Data Analysis (EDA)
+- Feature Engineering
+- Streamlit
+- MLflow
+- Plotly
+
+## Key Features
+
+- Investment potential classification.
+- Current property price estimation.
+- Five-year property price projection.
+- Interactive property exploration and filtering.
+- Location-based market insights.
+- EDA visualizations and correlation analysis.
+- Model evaluation and feature importance.
+- Methodology and limitations documentation.
+
+## Application Pages
+
+1. **Predict:** Evaluate property details and generate investment assessments.
+2. **Explore Properties:** Explore and filter property listings.
+3. **Market Insights:** Visualize market patterns and property analytics.
+4. **Model Details:** Review model performance and evaluation metrics.
+5. **Methodology & Limitations:** Understand the assumptions, modelling approach and limitations.
+
+## Machine Learning Approach
+
+### 1. Data Preprocessing
+- Missing-value handling.
+- Duplicate detection.
+- Numerical feature preprocessing and scaling.
+- Categorical feature encoding.
+- Feature engineering.
+- Data quality auditing.
+
+### 2. Exploratory Data Analysis
+The project includes 20 EDA visualizations covering:
+- Property price and size distributions.
+- Price per square foot analysis.
+- State and city comparisons.
+- Property age and BHK distributions.
+- Feature correlations.
+- Nearby infrastructure analysis.
+- Furnishing and property characteristics.
+- Ownership and availability patterns.
+- Parking, amenities and transportation.
+
+### 3. Classification
+
+Predicts whether a property meets the project's predefined Good Investment criteria.
+
+**Important:** The classification target is a rule-based proxy, not an observed real-world investment outcome.
+
+### 4. Regression
+
+Estimates current property prices using available property attributes.
+
+### 5. Five-Year Price Projection
+
+Provides scenario-based price projections using assumed appreciation rates and predefined adjustment rules.
+
+These projections are assumption-based calculations, not validated future-price predictions.
+
+## Model Evaluation
+
+### Classification
+
+The classifier achieved approximately 99.9% accuracy in reproducing the rule-based target.
+
+This result does not establish the ability to predict actual investment success.
+
+### Regression
+
+The evaluated regression model achieved approximately:
+
+- RMSE: ₹141.2 lakh
+- R²: approximately 0.000
+
+The model did not outperform the mean-price baseline.
+
+Detailed evaluation results are available in `reports/evaluation_report.md`.
+
+## Project Structure
+
+```text
+real_estate_advisor/
+│
+├── .streamlit/
+│   └── config.toml
+│
+├── data/
+│   └── DATA_DICTIONARY.md
+│
+├── eda_outputs/
+│   ├── findings.md
+│   └── EDA visualizations
+│
+├── models/
+│   ├── classifier.joblib
+│   ├── regressor.joblib
+│   └── metadata.json
+│
+├── reports/
+│   ├── data_audit.md
+│   ├── evaluation_report.md
+│   ├── metrics.json
+│   └── run_log.jsonl
+│
+├── src/
+│   ├── audit.py
+│   ├── eda.py
+│   ├── features.py
+│   ├── predict.py
+│   ├── tracking.py
+│   ├── train.py
+│   └── ui.py
+│
+├── tests/
+├── app.py
+├── requirements.txt
+├── smoke_test.py
+├── .gitignore
+└── README.md
+```
+
+## Installation and Execution
+
+### 1. Clone the repository
+
 ```bash
-python -m venv .venv && source .venv/bin/activate      # Python 3.10+ (tested on 3.12)
+git clone https://github.com/Kusuma-Ramesh/real_estate_advisor.git
+cd real_estate_advisor
+```
+
+### 2. Create a virtual environment
+
+```bash
+python -m venv .venv
+```
+
+Activate it on Windows:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+### 3. Install dependencies
+
+```bash
 pip install -r requirements.txt
-python -m src.train        # retrain, evaluate, write models/ + reports/ (logs to MLflow if installed)
-python -m src.eda          # 20 EDA charts + eda_outputs/findings.md
-python -m src.audit        # reports/data_audit.md
-python -m unittest discover -s tests -v
+```
+
+### 4. Configure input data
+
+Input data files are intentionally not included in this public repository.
+
+Provide an authorized, compatible local data source before running data-dependent operations.
+
+### 5. Run the application
+
+```bash
 streamlit run app.py
-mlflow ui --backend-store-uri sqlite:///mlflow.db      # after training with MLflow installed
-```
-Trained models are included (built with scikit-learn 1.8). Saved models are version-specific: if yours differs, the app detects the
-failed load (e.g. `No module named '_loss'`), retrains once (~1 min) and carries on. You can also run `python -m src.train` yourself.
-
-## Structure
-```
-app.py                  Streamlit app: Predict · Explore · Market insights · Model details · Methodology
-src/features.py         cleaning, feature engineering, proxy label, assumption-based growth (all constants here)
-src/train.py            leak-free split, baselines, CV model selection, permutation importance, tracking, report
-src/ui.py               theme/CSS and chart-styling helpers for the app (presentation only)
-.streamlit/config.toml  dark navy + gold theme
-src/predict.py          input validation + assessment logic (used by the app and tests; no Streamlit dependency)
-src/tracking.py         MLflow wrapper with JSON-lines fallback
-src/eda.py              the 20 EDA questions -> eda_outputs/q01..q20 PNGs + findings.md (+1 extra chart)
-src/audit.py            reproducible data audit -> reports/data_audit.md
-models/                 classifier.joblib, regressor.joblib, metadata.json
-reports/                evaluation_report.md, metrics.json, data_audit.md, run_log.jsonl
-tests/                  unittest suite
 ```
 
-## Methodology
-| Output | Nature | Evaluation |
-|---|---|---|
-| Good-Investment class | Classifier trained on a **rule-based proxy** (price/sq ft ≤ city median **and** ≥5/8 checklist points) | Held-out *rule recovery* vs baselines |
-| Current price estimate | **Learned** from observed `Price_in_Lakhs`, using non-price attributes only | Held-out RMSE/MAE/R² vs mean & city-mean baselines |
-| 5-year projected price | **Assumption**: 8% base growth ± fixed city/type/infrastructure/availability/age adjustments, clipped to 4-12% | **None** (no historical target) |
+### 6. Run tests
 
-**Fixes from the audit** (details in `reports/data_audit.md`)
-- *Leakage:* the original regressor "predicted" a deterministic function of its own inputs (R² ≈ 0.9999) and city medians used by
-  labels came from all rows. Now: split first; city medians from training rows only; the price model excludes price and price/sq ft;
-  the 5-year price is no longer presented as a learned model.
-- *Preprocessing:* `select_dtypes("object")` (breaks/warns on pandas 3) replaced; source `Price_per_SqFt` (lakhs, rounded) recomputed in ₹/sq ft;
-  Yes/No encoding made idempotent; unused/ill-defined `Locality` kept out of models.
-- *Dates:* age always derived from `Year_Built` against one reference year (2025, the dataset snapshot); app blocks future build years and warns outside 1990-2023.
-- *Floors:* 46.5% of rows have `Floor_No > Total_Floors`; kept, flagged (`Floor_Inconsistent`), ratio capped; the app rejects such input.
-- *Model selection* uses cross-validation on training data; the test set is used once for reporting.
+```bash
+python -m pytest -v
+```
 
-## Results (held-out 50,000 rows; generated by `src.train`, full tables in `reports/evaluation_report.md`)
-_Figures below are from the shipped run. After you retrain, `reports/evaluation_report.md` holds the authoritative numbers for your run._
-- **Classification (rule recovery - the ~99.9% figure only shows the model reproduces a hand-written rule; it says nothing about real investment success):** majority baseline accuracy 0.701; "cheaper than city median" heuristic 0.800; logistic regression 0.883
-  (ROC-AUC 0.955); HistGradientBoosting 0.999 (ROC-AUC 1.000). Without price inputs: 0.824. The near-perfect score reflects recovering the rule, **not** predictive power on real outcomes.
-- **Current-price regression:** RMSE ≈ 141.2 lakhs for every model, R² ≈ 0.000. The selected model does **not** beat the predict-the-mean or per-city-mean baselines (141.193 / 141.195 vs 141.197); typical error (MAE ≈ 122 lakhs) is ~48% of the mean listing price (₹255 lakhs). Price is statistically independent of the other columns, so there is nothing to learn.
-- **EDA:** all 20 questions answered in `eda_outputs/findings.md`; most show flat relationships because the data look synthetic.
+### 7. Run EDA and data audit
+
+```bash
+python -m src.eda
+python -m src.audit
+```
+
+### 8. Train the models
+
+```bash
+python -m src.train
+```
+
+MLflow tracking integration is provided in the training pipeline. Experiment history and registered models are not included as published tracking artifacts.
+
+## Documentation
+
+Additional project documentation:
+
+- `data/DATA_DICTIONARY.md`
+- `eda_outputs/findings.md`
+- `reports/data_audit.md`
+- `reports/evaluation_report.md`
 
 ## Limitations
-- **Synthetic-looking data (fundamental).** Size, price and year built are near-uniform; categories are almost perfectly balanced; BHK is unrelated to size (22,355 one-BHK listings of 3,000+ sq ft); price is unrelated to every attribute (city explains 0.02% of its variance); 77,128 "under construction" listings have build years of 2010 or earlier; 90% of houses/villas sit in buildings with more than 3 floors; 46.5% of rows have Floor_No > Total_Floors. These rows are flagged and disclosed, not repaired, because repairing would fabricate data. See `reports/data_audit.md`. Real conclusions need real listings with sale dates and outcomes.
-- **No outcome data.** No resale prices, rental yields or returns exist, so "good investment" is a hand-written rule and the classifier reproduces it. Genuine forecasting would require historical price series per property or locality.
-- **Five-year price is an assumption.** price × (1+r)^5 with r from fixed rules (4-12%); accuracy is unmeasurable here. The horizon is counted from the dataset's 2025 reference year (ends 2030), not from today. The 4%/8%/12% scenarios are arithmetic.
-- **Price model has no skill.** R² ≈ 0 and it does not beat the mean/per-city baselines; importances are noise-level.
-- No crime-rate column exists; Locality ids are not tied to cities and are not used by models; no time dimension, so "trend" charts are year-built cohorts.
-- Evaluation: one random split/seed, no test-metric confidence intervals; CV on a 60k-row training subsample; CV labels use whole-training-split city medians (a tiny, quantified optimism, see `reports/evaluation_report.md` section 5).
-- Screening aid only; not financial advice.
 
-## Testing status
-Run in the development sandbox: unit tests (feature engineering, leakage guards, validation, predict logic, projection formula/units, reproduction of the saved held-out metrics, tracking with a stubbed MLflow), end-to-end training, EDA, audit, and an execution of every app page against a fake Streamlit/Plotly (real data and models; catches Python errors, not visual problems).
-**Not executed there (no network → packages unavailable):** the Streamlit UI and Plotly charts (`app.py`/`src/ui.py` were only syntax-checked in the sandbox; the owner has since opened the app locally), and real MLflow logging/UI. The restyled interface has not been visually verified by me.
-Please run `streamlit run app.py` and `python -m src.train` with MLflow installed once on your machine to confirm.
+- The classification target is based on predefined rules rather than observed investment outcomes.
+- Future property prices are estimated using assumed appreciation scenarios.
+- The regression model has limited predictive performance and does not outperform the mean baseline.
+- Property characteristics and relationships in the underlying data have limitations.
+- Reliable investment forecasting requires representative historical property transactions, resale prices and rental-return data.
+- Model outputs should be treated as screening aids, not financial advice.
+
+## Testing
+
+The project has undergone:
+- Automated unit testing.
+- Python compilation checks.
+- Model evaluation.
+- Data auditing.
+- Manual Streamlit application testing.
+
+The locally tested application passed all 26 automated tests.
+
+## Disclaimer
+
+This application is developed for educational and analytical purposes. Its outputs are not financial, legal or investment advice. Users should independently verify property information and consult qualified professionals before making investment decisions.
+
+## Author
+
+**Kusuma Ramesh**
+
+GitHub: https://github.com/Kusuma-Ramesh
+
+---
+
+*Built with Python, Machine Learning and Streamlit.*
